@@ -1,37 +1,33 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { TodoApiModule } from './todo-api/todo-api.module'
-import * as cors from 'cors'
-import * as helmet from 'helmet'
-import { handlers } from './util/morgan'
-import { MongooseModule } from '@nestjs/mongoose'
+import { MongooseModule, MongooseModuleAsyncOptions } from '@nestjs/mongoose'
 import { ConfigModule, ConfigService } from '@nestjs/config'
-
+import config from './util/config'
 @Module({
 	imports: [
 		TodoApiModule,
+		// Config Module Root import
 		ConfigModule.forRoot({
 			isGlobal: true,
+			load: [config],
 		}),
+		// mongoose Module import
 		MongooseModule.forRootAsync({
 			imports: [ConfigModule],
 			inject: [ConfigService],
-			useFactory: (configService: ConfigService) => ({
-				uri: configService.get('DB'),
-			}),
+			useFactory: (configService: ConfigService) =>
+				({
+					uri: configService.get('DB'),
+					useNewUrlParser: true,
+					useCreateIndex: true,
+					useUnifiedTopology: true,
+					connectTimeoutMS: 3000,
+					serverSelectionTimeoutMS: 18000,
+					useFindAndModify: false,
+				} as MongooseModuleAsyncOptions),
 		}),
 	],
 	controllers: [],
 	providers: [],
 })
-export class AppModule implements NestModule {
-	configure(consumer: MiddlewareConsumer) {
-		consumer
-			.apply(
-				cors(),
-				helmet(),
-				handlers.errorHandler,
-				handlers.successHandler,
-			)
-			.forRoutes('*')
-	}
-}
+export class AppModule {}
