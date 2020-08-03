@@ -1,15 +1,13 @@
-import { Injectable, HttpException, HttpStatus } from "@nestjs/common"
-import { InjectModel } from "@nestjs/mongoose"
-import { Model } from "mongoose"
-import { Note } from "./interfaces/notes.interface"
+import { Injectable } from '@nestjs/common'
+import { Model } from 'mongoose'
+import { Note } from './interfaces/notes.interface'
+import { InjectModel } from '@nestjs/mongoose'
 
 @Injectable()
 export class TodoService {
-	constructor(@InjectModel("todo") private todoModel: Model<Note>) {}
+	constructor(@InjectModel('todo') private todoModel: Model<Note>) {}
 	async postNotes(note: Note): Promise<any> {
-		if (!note.note) {
-			throw new HttpException("note is required.", HttpStatus.BAD_REQUEST)
-		}
+		note = await new this.todoModel(note).save()
 		return note
 	}
 	async getNotes(): Promise<Note[]> {

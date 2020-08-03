@@ -1,15 +1,11 @@
-import { Module } from "@nestjs/common"
-import { MongooseModule } from "@nestjs/mongoose"
-import { todoSchema } from "./todo-api.schema"
+import { Module, Global } from '@nestjs/common'
+import { providers } from './model.provider'
 
+@Global()
 @Module({
 	controllers: [],
 	providers: [],
-	imports: [
-		MongooseModule.forFeature([{ name: "todo", schema: todoSchema }]),
-	],
-	exports: [
-		MongooseModule.forFeature([{ name: "todo", schema: todoSchema }]),
-	],
+	imports: [...providers],
+	exports: [...providers],
 })
 export class ModelModule {}
